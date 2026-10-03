@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment Gateway Demo</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #14171c; --muted: #5d6673; --border: #e2e5ea;
+    --accent: #1a56db; --accent-text: #ffffff; --input: #ffffff;
+    --ok: #0e7a43; --ok-bg: #e3f5eb; --warn: #9a5b00; --warn-bg: #fdf1dc;
+    --bad: #b42318; --bad-bg: #fde8e7; --info: #3b4a63; --info-bg: #e9edf4;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --panel: #171b21; --text: #e8ebef; --muted: #98a2b0; --border: #2a303a;
+      --accent: #5b8cff; --accent-text: #0f1216; --input: #11151a;
+      --ok: #5fd39a; --ok-bg: #12301f; --warn: #f2b85b; --warn-bg: #33270f;
+      --bad: #ff8a80; --bad-bg: #3a1714; --info: #b8c4d8; --info-bg: #1f2633;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { padding: 24px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  @media (max-width: 820px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; min-width: 0; }
+  .panel h2 { margin: 0 0 12px; font-size: 16px; }
+  .wide { grid-column: 1 / -1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .chip { border: 1px solid var(--border); background: var(--input); color: var(--text); border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid .full { grid-column: 1 / -1; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input, select { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--input); color: var(--text); font: inherit; }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  button.primary { margin-top: 16px; width: 100%; padding: 11px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-text); font: inherit; font-weight: 600; cursor: pointer; }
+  button.primary:disabled { opacity: .6; cursor: wait; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .Authorized { color: var(--ok); background: var(--ok-bg); }
+  .Declined { color: var(--warn); background: var(--warn-bg); }
+  .Rejected, .Error { color: var(--bad); background: var(--bad-bg); }
+  .NotFound { color: var(--info); background: var(--info-bg); }
+  .result-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .http { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .explain { color: var(--muted); margin: 0 0 12px; }
+  pre { margin: 0; background: var(--input); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font: 13px/1.45 var(--mono); overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+  .empty { color: var(--muted); }
+  .lookup { display: flex; gap: 8px; margin-bottom: 16px; }
+  .lookup input { font-family: var(--mono); font-size: 13px; }
+  .lookup button, td button { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--input); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  td.id { font-family: var(--mono); font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Payment Gateway Demo</h1>
+  <p>Send card payments through the gateway to the bank simulator, then retrieve them by id.</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>New payment</h2>
+    <div class="chips" role="group" aria-label="Scenarios">
+      <button class="chip" data-scenario="authorized">Authorized</button>
+      <button class="chip" data-scenario="declined">Declined</button>
+      <button class="chip" data-scenario="unavailable">Bank unavailable</button>
+      <button class="chip" data-scenario="rejected">Invalid (rejected)</button>
+    </div>
+    <form id="payment-form" class="grid" autocomplete="off">
+      <div class="full">
+        <label for="cardNumber">Card number</label>
+        <input id="cardNumber" inputmode="numeric">
+        <div class="hint">Last digit decides the bank's answer: odd authorizes, even declines, 0 means the bank is down.</div>
+      </div>
+      <div>
+        <label for="expiryMonth">Expiry month</label>
+        <input id="expiryMonth" type="number">
+      </div>
+      <div>
+        <label for="expiryYear">Expiry year</label>
+        <input id="expiryYear" type="number">
+      </div>
+      <div>
+        <label for="currency">Currency</label>
+        <select id="currency">
+          <option>GBP</option><option>USD</option><option>EUR</option><option>JPY</option>
+        </select>
+      </div>
+      <div>
+        <label for="amount">Amount (minor units)</label>
+        <input id="amount" type="number">
+        <div class="hint" id="amount-hint"></div>
+      </div>
+      <div class="full">
+        <label for="cvv">CVV</label>
+        <input id="cvv" inputmode="numeric">
+      </div>
+      <div class="full">
+        <button class="primary" type="submit" id="submit">Pay</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Response</h2>
+    <div id="result"><p class="empty">Pick a scenario and press Pay.</p></div>
+  </section>
+
+  <section class="panel wide">
+    <h2>Payments</h2>
+    <form class="lookup" id="lookup-form">
+      <input id="lookup-id" placeholder="Payment id (GUID)" aria-label="Payment id">
+      <button type="submit">Retrieve</button>
+    </form>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Id</th><th>Status</th><th>Card</th><th>Expiry</th><th>Amount</th><th></th></tr></thead>
+        <tbody id="payments"><tr><td colspan="6" class="empty">Payments you make here will appear in this list.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  const nextYear = new Date().getFullYear() + 1;
+  const scenarios = {
+    authorized:  { cardNumber: "2222405343248877", expiryMonth: 4,  expiryYear: nextYear, currency: "GBP", amount: 1050,  cvv: "123" },
+    declined:    { cardNumber: "2222405343248112", expiryMonth: 12, expiryYear: nextYear, currency: "USD", amount: 60000, cvv: "456" },
+    unavailable: { cardNumber: "2222405343248110", expiryMonth: 1,  expiryYear: nextYear, currency: "EUR", amount: 999,   cvv: "1234" },
+    rejected:    { cardNumber: "4242",             expiryMonth: 13, expiryYear: 2020,     currency: "JPY", amount: 0,     cvv: "12a" }
+  };
+  const fields = ["cardNumber", "expiryMonth", "expiryYear", "currency", "amount", "cvv"];
+  const $ = id => document.getElementById(id);
+  const payments = [];
+
+  function fill(name) {
+    const s = scenarios[name];
+    fields.forEach(f => $(f).value = s[f]);
+    updateAmountHint();
+  }
+
+  function updateAmountHint() {
+    const n = Number($("amount").value);
+    $("amount-hint").textContent = Number.isInteger(n) && $("amount").value !== ""
+      ? `= ${(n / 100).toFixed(2)} ${$("currency").value}` : "";
+  }
+
+  function readForm() {
+    const num = v => v === "" ? null : Number(v);
+    return {
+      cardNumber: $("cardNumber").value,
+      expiryMonth: num($("expiryMonth").value),
+      expiryYear: num($("expiryYear").value),
+      currency: $("currency").value,
+      amount: num($("amount").value),
+      cvv: $("cvv").value
+    };
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function explain(code, body) {
+    if (code === 200 && body.status === "Authorized") return "The bank authorized the payment. It is stored and can be retrieved by id.";
+    if (code === 200 && body.status === "Declined") return "The bank declined the payment. It is still stored, so the merchant can see the outcome.";
+    if (code === 400) return "The gateway rejected the request before calling the bank. Nothing was stored.";
+    if (code === 502) return "The bank was unavailable, so the outcome is unknown. Nothing was stored and the merchant can retry.";
+    if (code === 404) return "No payment exists with this id.";
+    return "";
+  }
+
+  function showResult(method, url, code, body) {
+    const label = code === 400 ? "Rejected" : code === 404 ? "NotFound" : code >= 500 ? "Error" : (body && body.status) || "Error";
+    const text = label === "NotFound" ? "Not found" : label === "Error" ? "Bank unavailable" : label;
+    $("result").innerHTML = `
+      <div class="result-head"><span class="badge ${label}">${escapeHtml(text)}</span>
+      <span class="http">${method} ${escapeHtml(url)} → ${code}</span></div>
+      <p class="explain">${escapeHtml(explain(code, body || {}))}</p>
+      <pre>${escapeHtml(body ? JSON.stringify(body, null, 2) : "(empty body)")}</pre>`;
+  }
+
+  async function call(method, url, payload) {
+    const response = await fetch(url, {
+      method,
+      headers: payload ? { "Content-Type": "application/json" } : {},
+      body: payload ? JSON.stringify(payload) : undefined
+    });
+    const text = await response.text();
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch { body = { raw: text }; }
+    showResult(method, url, response.status, body);
+    return { code: response.status, body };
+  }
+
+  function renderPayments() {
+    $("payments").innerHTML = payments.length === 0
+      ? `<tr><td colspan="6" class="empty">Payments you make here will appear in this list.</td></tr>`
+      : payments.map(p => `<tr>
+          <td class="id">${escapeHtml(p.id)}</td>
+          <td><span class="badge ${escapeHtml(p.status)}">${escapeHtml(p.status)}</span></td>
+          <td>•••• ${escapeHtml(p.cardNumberLastFour)}</td>
+          <td>${String(p.expiryMonth).padStart(2, "0")}/${p.expiryYear}</td>
+          <td>${(p.amount / 100).toFixed(2)} ${escapeHtml(p.currency)}</td>
+          <td><button data-id="${escapeHtml(p.id)}">Retrieve</button></td>
+        </tr>`).join("");
+  }
+
+  async function handle(action) {
+    try { await action(); }
+    catch (e) {
+      $("result").innerHTML = `<div class="result-head"><span class="badge Error">Network error</span></div>
+        <p class="explain">Could not reach the gateway. Is the demo stack running?</p><pre>${escapeHtml(e.message)}</pre>`;
+    }
+  }
+
+  document.querySelectorAll("[data-scenario]").forEach(b => b.addEventListener("click", () => fill(b.dataset.scenario)));
+  $("amount").addEventListener("input", updateAmountHint);
+  $("currency").addEventListener("change", updateAmountHint);
+
+  $("payment-form").addEventListener("submit", e => {
+    e.preventDefault();
+    $("submit").disabled = true;
+    handle(async () => {
+      const { code, body } = await call("POST", "/api/payments", readForm());
+      if (code === 200) { payments.unshift(body); renderPayments(); $("lookup-id").value = body.id; }
+    }).finally(() => $("submit").disabled = false);
+  });
+
+  $("lookup-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const id = $("lookup-id").value.trim();
+    if (id) handle(() => call("GET", `/api/payments/${encodeURIComponent(id)}`));
+  });
+
+  $("payments").addEventListener("click", e => {
+    const id = e.target.dataset && e.target.dataset.id;
+    if (id) handle(() => call("GET", `/api/payments/${id}`));
+  });
+
+  fill("authorized");
+</script>
+</body>
+</html>

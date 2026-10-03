@@ -1,0 +1,31 @@
+# Demo stack: bank simulator + payment gateway API + a small web UI.
+# Run from this folder:  docker-compose -f docker-compose.yml -f docker-compose.demo.yml up --build
+# Then open http://localhost:3000
+
+services:
+  payment_gateway:
+    container_name: payment_gateway
+    build: .
+    environment:
+      - AcquiringBank__BaseUrl=http://bank_simulator:8080/
+    ports:
+      - "5080:8080"
+    depends_on:
+      - bank_simulator
+
+  demo_ui:
+    container_name: payment_gateway_demo_ui
+    image: nginx:1.27-alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - type: bind
+        source: ./demo/index.html
+        target: /usr/share/nginx/html/index.html
+        read_only: true
+      - type: bind
+        source: ./demo/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    depends_on:
+      - payment_gateway

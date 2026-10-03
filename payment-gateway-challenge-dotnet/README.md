@@ -15,6 +15,18 @@ dotnet run --project src/PaymentGateway.Api        # API on http://localhost:506
 
 `src/PaymentGateway.Api/PaymentGateway.Api.http` has ready-made requests for every outcome. The bank URL is configured with `AcquiringBank:BaseUrl` in `appsettings.json`.
 
+## Demo UI
+
+A one-page UI to try the gateway end to end, with the bank simulator, API and UI all in Docker:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.demo.yml up --build
+```
+
+Open http://localhost:3000. Scenario buttons fill in an authorized, declined, bank-unavailable or invalid payment. Each response is shown with its HTTP code and a plain explanation, and payments made in the session can be retrieved by id. The API is also exposed directly on http://localhost:5080.
+
+nginx serves `demo/index.html` and proxies `/api` to the gateway, so the API needs no CORS setup. The demo is kept out of the API project on purpose.
+
 ## API
 
 ### `POST /api/payments`
