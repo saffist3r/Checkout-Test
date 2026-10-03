@@ -1,18 +1,23 @@
-﻿using PaymentGateway.Api.Models.Responses;
+using System.Collections.Concurrent;
+
+using PaymentGateway.Api.Models;
 
 namespace PaymentGateway.Api.Services;
 
+/// <summary>
+/// In-memory test double standing in for a real data store.
+/// </summary>
 public class PaymentsRepository
 {
-    public List<PostPaymentResponse> Payments = new();
-    
-    public void Add(PostPaymentResponse payment)
+    private readonly ConcurrentDictionary<Guid, Payment> _payments = new();
+
+    public void Add(Payment payment)
     {
-        Payments.Add(payment);
+        _payments[payment.Id] = payment;
     }
 
-    public PostPaymentResponse Get(Guid id)
+    public Payment? Get(Guid id)
     {
-        return Payments.FirstOrDefault(p => p.Id == id);
+        return _payments.TryGetValue(id, out Payment? payment) ? payment : null;
     }
 }
