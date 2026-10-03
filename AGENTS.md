@@ -10,7 +10,7 @@ A take-home technical assessment for Checkout.com: build a small **payment gatew
 | Path | What it is | Can we change it? |
 |------|------------|-------------------|
 | `assessment/` | Submodule of `cko-recruitment/.github`. The full brief lives in `assessment/profile/README.md`. | **No.** Read only. |
-| `payment-gateway-challenge-dotnet/` | Submodule of the .NET template. **All solution code goes here.** | Yes, except the files below. |
+| `payment-gateway-challenge-dotnet/` | The .NET template, brought in as a regular folder (with its history) so the solution can be pushed to our own repo. **All solution code goes here.** | Yes, except the files below. |
 | `payment-gateway-challenge-dotnet/imposters/` | Bank simulator (Mountebank) config. | **No.** |
 | `payment-gateway-challenge-dotnet/.editorconfig` | Formatting rules used to grade submissions. | **No.** |
 | `payment-gateway-challenge-dotnet/docker-compose.yml` | Starts the simulator. | Only if strictly needed; prefer not. |
@@ -24,7 +24,7 @@ A take-home technical assessment for Checkout.com: build a small **payment gatew
 3. **Simple and maintainable. No over-engineering.** Reviewers explicitly penalise it. No MediatR, CQRS, repositories-of-repositories, generic base classes, AutoMapper, or extra projects "for later".
 4. **Focus on the functional requirements**: process a payment (Authorized / Declined / Rejected) and retrieve a payment by id.
 5. **Document key design decisions and assumptions** in `payment-gateway-challenge-dotnet/README.md`.
-6. **Never open pull requests or push to `cko-recruitment` repositories.** The submodule remote is read-only for us; the solution is shared the way the Checkout talent team instructs.
+6. **Never open pull requests or push to `cko-recruitment` repositories.** Our remote is `git@github.com:saffist3r/Checkout-Test.git`.
 
 ## 3. Workflow rules for agents
 
