@@ -1,0 +1,6 @@
+[submodule "assessment"]
+	path = assessment
+	url = https://github.com/cko-recruitment/.github.git
+[submodule "payment-gateway-challenge-dotnet"]
+	path = payment-gateway-challenge-dotnet
+	url = https://github.com/cko-recruitment/payment-gateway-challenge-dotnet.git
