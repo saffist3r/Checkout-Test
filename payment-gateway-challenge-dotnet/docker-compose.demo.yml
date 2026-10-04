@@ -8,6 +8,8 @@ services:
     build: .
     environment:
       - AcquiringBank__BaseUrl=http://bank_simulator:8080/
+      # Development turns on Swagger at http://localhost:5080/swagger for the demo.
+      - ASPNETCORE_ENVIRONMENT=Development
     ports:
       - "5080:8080"
     depends_on:

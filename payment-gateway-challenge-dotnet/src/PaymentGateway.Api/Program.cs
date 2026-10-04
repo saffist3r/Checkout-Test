@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
 
 using PaymentGateway.Api.Models.Responses;
 using PaymentGateway.Api.Services;
@@ -35,7 +36,17 @@ builder.Services.AddControllers()
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Payment Gateway API",
+        Version = "v1",
+        Description = "Lets a merchant process a card payment through the acquiring bank and retrieve it later. " +
+            "Amounts are integers in minor units (1050 = 10.50). Only the last four card digits are ever returned."
+    });
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(Program).Assembly.GetName().Name}.xml"));
+});
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<PaymentsRepository>();

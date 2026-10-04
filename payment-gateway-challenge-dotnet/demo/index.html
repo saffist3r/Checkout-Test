@@ -25,6 +25,7 @@
   header { padding: 24px 16px 8px; max-width: 1100px; margin: 0 auto; }
   header h1 { margin: 0; font-size: 22px; }
   header p { margin: 4px 0 0; color: var(--muted); }
+  header a { color: var(--accent); }
   main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   @media (max-width: 820px) { main { grid-template-columns: minmax(0, 1fr); } }
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; min-width: 0; }
@@ -64,7 +65,7 @@
 <body>
 <header>
   <h1>Payment Gateway Demo</h1>
-  <p>Send card payments through the gateway to the bank simulator, then retrieve them by id.</p>
+  <p>Send card payments through the gateway to the bank simulator, then retrieve them by id. <a href="http://localhost:5080/swagger" target="_blank" rel="noopener">API docs (Swagger)</a></p>
 </header>
 
 <main>

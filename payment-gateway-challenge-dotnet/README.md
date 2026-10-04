@@ -23,7 +23,7 @@ A one-page UI to try the gateway end to end, with the bank simulator, API and UI
 docker-compose -f docker-compose.yml -f docker-compose.demo.yml up --build
 ```
 
-Open http://localhost:3000. Scenario buttons fill in an authorized, declined, bank-unavailable or invalid payment. Each response is shown with its HTTP code and a plain explanation, and payments made in the session can be retrieved by id. The API is also exposed directly on http://localhost:5080.
+Open http://localhost:3000. Scenario buttons fill in an authorized, declined, bank-unavailable or invalid payment. Each response is shown with its HTTP code and a plain explanation, and payments made in the session can be retrieved by id. The API is also exposed directly on http://localhost:5080, with Swagger at http://localhost:5080/swagger (linked from the page header).
 
 nginx serves `demo/index.html` and proxies `/api` to the gateway, so the API needs no CORS setup. The demo is kept out of the API project on purpose.
 
@@ -87,12 +87,12 @@ PaymentsController          HTTP only: validate, call the service, map to a stat
 
 ## Tests
 
-61 tests, all deterministic (fixed `TimeProvider`, no network):
+62 tests, all deterministic (fixed `TimeProvider`, no network):
 
 - `PaymentRequestValidatorTest`: every rule with its boundaries (13/14/19/20 digits, month 0/1/12/13, last vs current month, currency ISO 4217 vs supported, CVV length and characters).
 - `PaymentsServiceTest`: status mapping, last-four extraction, and the bank request (`MM/yyyy` expiry).
 - `AcquiringBankClientTest`: snake_case wire format, and `4xx`/`5xx`, network failure and bad JSON all becoming `BankUnavailableException`. Uses a stub `HttpMessageHandler`.
-- `PaymentsControllerIntegrationTest`: `WebApplicationFactory` with a fake bank, covering every row of the API table, the POST → GET round trip, rejection without calling the bank, and no card number or CVV in responses.
+- `PaymentsControllerIntegrationTest`: `WebApplicationFactory` with a fake bank, covering every row of the API table, the POST → GET round trip, rejection without calling the bank, no card number or CVV in responses, and the Swagger document listing both endpoints.
 
 ### End-to-end user flows
 

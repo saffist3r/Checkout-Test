@@ -65,6 +65,19 @@ public class PaymentsControllerIntegrationTest : IClassFixture<WebApplicationFac
     }
 
     [Fact]
+    public async Task ShouldDescribeBothEndpointsInSwagger()
+    {
+        HttpResponseMessage response = await _client.GetAsync("/swagger/v1/swagger.json");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using JsonDocument document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        JsonElement paths = document.RootElement.GetProperty("paths");
+        paths.GetProperty("/api/Payments").TryGetProperty("post", out _).ShouldBeTrue();
+        paths.GetProperty("/api/Payments/{id}").TryGetProperty("get", out _).ShouldBeTrue();
+        document.RootElement.GetProperty("info").GetProperty("title").GetString().ShouldBe("Payment Gateway API");
+    }
+
+    [Fact]
     public async Task ShouldNeverReturnFullCardNumberOrCvv()
     {
         HttpResponseMessage response = await _client.PostAsJsonAsync(PaymentsPath, TestData.ValidRequest());
