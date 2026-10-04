@@ -1,0 +1,11 @@
+{
+  "name": "payment-gateway-e2e",
+  "private": true,
+  "description": "Browser tests that use the demo page against the real stack: UI, gateway API and bank simulator.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

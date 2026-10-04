@@ -94,7 +94,16 @@ PaymentsController          HTTP only: validate, call the service, map to a stat
 - `AcquiringBankClientTest`: snake_case wire format, and `4xx`/`5xx`, network failure and bad JSON all becoming `BankUnavailableException`. Uses a stub `HttpMessageHandler`.
 - `PaymentsControllerIntegrationTest`: `WebApplicationFactory` with a fake bank, covering every row of the API table, the POST → GET round trip, rejection without calling the bank, and no card number or CVV in responses.
 
-I also checked every flow manually against the real simulator (authorized, declined, `503`→`502`, rejected, malformed, GET, `404`).
+### End-to-end user flows
+
+`e2e/` holds 6 Playwright tests that use the demo page the way a merchant would, against the real stack (UI, gateway, bank simulator): pay and retrieve an authorized payment, see a declined one stored, get "bank unavailable" with nothing stored, get every validation error at once, fix a rejected payment and resubmit, and look up an unknown id. They live outside the .NET solution because they test the running system, not the code.
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.demo.yml up -d --build
+cd e2e && npm ci && npx playwright install chromium && npm test
+```
+
+CI runs them in a separate job and posts a summary of each flow.
 
 ## What I'd do next
 
