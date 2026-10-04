@@ -122,3 +122,7 @@ CI runs them in a separate job and posts a summary of each flow.
 4. **Merchant authentication.** API keys, with payments scoped to the merchant that created them so one merchant can't read another's.
 5. **Observability.** Structured logs with correlation ids (e.g. a `Cko-Request-Id` response header), bank latency as a histogram next to the outcome counter, tracing, and a readiness check that does look at the bank.
 6. **Resilience.** A circuit breaker on the bank client. Retries only where safe: never blindly retry an authorization.
+
+## How I used AI tools
+
+I built this with Claude Code as a pair programmer. Before any code, I wrote down the rules it had to follow: `AGENTS.md` (scope, API contract, testing and security rules) and the skills in `.claude/skills/` (C# style taken from Checkout's public .NET SDK, testing, payments practices and system design). It drafted code, tests and docs against those rules. I made the decisions in the tables above, reviewed the changes and pushed back where they didn't fit, for example on folder layout and how currencies are validated. Nothing was merged unless the build had zero warnings and the unit, API and browser tests passed.
