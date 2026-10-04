@@ -57,7 +57,7 @@ We follow the conventions of Checkout's own public .NET code ([checkout-sdk-net]
 src/PaymentGateway.Api
   Controllers/        HTTP only: bind, call, map to status codes. No business logic.
   Models/             Domain record (Payment), PaymentStatus enum, request and response DTOs.
-  Services/           PaymentRequestValidator, Iso4217 (local code list), PaymentsService (orchestration), PaymentsRepository (in-memory).
+  Services/           PaymentRequestValidator, Iso4217 (local code list), PaymentsService (orchestration), PaymentsRepository (in-memory), PaymentMetrics (outcome counter).
   Services/Bank/      IAcquiringBankClient + typed HttpClient implementation and bank DTOs.
 test/PaymentGateway.Api.Tests
   Unit tests per class + in-process API tests with WebApplicationFactory.

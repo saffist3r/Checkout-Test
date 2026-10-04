@@ -31,6 +31,7 @@ builder.Services.AddControllers()
             {
                 errors.Remove("request");
             }
+            context.HttpContext.RequestServices.GetRequiredService<PaymentMetrics>().RecordPayment(PaymentMetrics.Rejected);
             return new BadRequestObjectResult(new RejectedPaymentResponse(errors));
         };
     });
@@ -51,6 +52,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<PaymentsRepository>();
 builder.Services.AddSingleton<PaymentRequestValidator>();
+builder.Services.AddSingleton<PaymentMetrics>();
+builder.Services.AddHealthChecks();
 builder.Services.AddScoped<PaymentsService>();
 builder.Services.AddHttpClient<IAcquiringBankClient, AcquiringBankClient>(client =>
 {
@@ -70,6 +73,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.MapControllers();
+// Liveness only: it does not call the bank, so a bank outage does not take the gateway out of rotation.
+app.MapHealthChecks("/health");
 
 app.Run();
 

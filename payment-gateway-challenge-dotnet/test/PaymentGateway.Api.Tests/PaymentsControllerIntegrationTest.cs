@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
@@ -28,11 +29,12 @@ public class PaymentsControllerIntegrationTest : IClassFixture<WebApplicationFac
 
     private readonly FakeAcquiringBankClient _bank = new();
     private readonly PaymentsRepository _repository = new();
+    private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
     public PaymentsControllerIntegrationTest(WebApplicationFactory<Program> factory)
     {
-        _client = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        _factory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
             services.RemoveAll<IAcquiringBankClient>();
             services.AddSingleton<IAcquiringBankClient>(_bank);
@@ -40,7 +42,8 @@ public class PaymentsControllerIntegrationTest : IClassFixture<WebApplicationFac
             services.AddSingleton(_repository);
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(new FixedTimeProvider(TestData.Now));
-        })).CreateClient();
+        }));
+        _client = _factory.CreateClient();
     }
 
     [Theory]
@@ -62,6 +65,31 @@ public class PaymentsControllerIntegrationTest : IClassFixture<WebApplicationFac
         payment.ExpiryYear.ShouldBe(request.ExpiryYear!.Value);
         payment.Currency.ShouldBe(request.Currency);
         payment.Amount.ShouldBe(request.Amount!.Value);
+    }
+
+    [Fact]
+    public async Task ShouldReportHealthy()
+    {
+        HttpResponseMessage response = await _client.GetAsync("/health");
+
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await response.Content.ReadAsStringAsync()).ShouldBe("Healthy");
+    }
+
+    [Fact]
+    public async Task ShouldCountEveryPaymentOutcome()
+    {
+        using PaymentOutcomeRecorder recorder = new(_factory.Services.GetRequiredService<IMeterFactory>());
+        PostPaymentRequest invalid = TestData.ValidRequest();
+        invalid.Currency = "JPY";
+
+        await _client.PostAsJsonAsync(PaymentsPath, TestData.ValidRequest(TestData.AuthorizedCard));
+        await _client.PostAsJsonAsync(PaymentsPath, TestData.ValidRequest(TestData.DeclinedCard));
+        await _client.PostAsJsonAsync(PaymentsPath, TestData.ValidRequest(TestData.BankUnavailableCard));
+        await _client.PostAsJsonAsync(PaymentsPath, invalid);
+        await _client.PostAsync(PaymentsPath, new StringContent("""{"amount":10.5}""", Encoding.UTF8, "application/json"));
+
+        recorder.Outcomes.ShouldBe(new[] { "Authorized", "Declined", "BankUnavailable", "Rejected", "Rejected" });
     }
 
     [Fact]

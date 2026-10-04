@@ -46,6 +46,14 @@ nginx serves `demo/index.html` and proxies `/api` to the gateway, so the API nee
 
 `200` with the same payment body, or `404` if the id is unknown.
 
+### `GET /health`
+
+`200 Healthy` while the process is up. It is a liveness check only and does not call the bank: a bank outage already shows up as `502` and in the metric below, and it shouldn't take the gateway out of rotation.
+
+### Metric
+
+`payments.processed` (meter `PaymentGateway`) counts every `POST` by `outcome`: `Authorized`, `Declined`, `Rejected` or `BankUnavailable`. It uses the built-in `System.Diagnostics.Metrics`, so there's no extra package. Watch it locally with `dotnet-counters monitor --counters PaymentGateway`, or plug in an OpenTelemetry exporter.
+
 ## Design
 
 ```
@@ -87,12 +95,13 @@ PaymentsController          HTTP only: validate, call the service, map to a stat
 
 ## Tests
 
-62 tests, all deterministic (fixed `TimeProvider`, no network):
+65 tests, all deterministic (fixed `TimeProvider`, no network):
 
 - `PaymentRequestValidatorTest`: every rule with its boundaries (13/14/19/20 digits, month 0/1/12/13, last vs current month, currency ISO 4217 vs supported, CVV length and characters).
 - `PaymentsServiceTest`: status mapping, last-four extraction, and the bank request (`MM/yyyy` expiry).
+- `PaymentMetricsTest`: the counter records one measurement per payment, tagged with its outcome.
 - `AcquiringBankClientTest`: snake_case wire format, and `4xx`/`5xx`, network failure and bad JSON all becoming `BankUnavailableException`. Uses a stub `HttpMessageHandler`.
-- `PaymentsControllerIntegrationTest`: `WebApplicationFactory` with a fake bank, covering every row of the API table, the POST → GET round trip, rejection without calling the bank, no card number or CVV in responses, and the Swagger document listing both endpoints.
+- `PaymentsControllerIntegrationTest`: `WebApplicationFactory` with a fake bank, covering every row of the API table, the POST → GET round trip, rejection without calling the bank, no card number or CVV in responses, the Swagger document, `/health`, and the metric counting each outcome.
 
 ### End-to-end user flows
 
@@ -111,5 +120,5 @@ CI runs them in a separate job and posts a summary of each flow.
 2. **Unknown outcomes.** If the bank times out after receiving the request, the payment may have gone through. Record it as pending and reconcile with the bank instead of returning only `502`.
 3. **Persistence.** A durable store, encryption at rest, and `long` amounts.
 4. **Merchant authentication.** API keys, with payments scoped to the merchant that created them so one merchant can't read another's.
-5. **Observability.** Structured logs with correlation ids (e.g. a `Cko-Request-Id` response header), metrics on bank latency and error rate, and tracing.
+5. **Observability.** Structured logs with correlation ids (e.g. a `Cko-Request-Id` response header), bank latency as a histogram next to the outcome counter, tracing, and a readiness check that does look at the bank.
 6. **Resilience.** A circuit breaker on the bank client. Retries only where safe: never blindly retry an authorization.

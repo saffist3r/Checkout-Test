@@ -15,17 +15,20 @@ public class PaymentsController : ControllerBase
     private readonly PaymentRequestValidator _validator;
     private readonly PaymentsService _paymentsService;
     private readonly PaymentsRepository _paymentsRepository;
+    private readonly PaymentMetrics _metrics;
     private readonly ILogger<PaymentsController> _logger;
 
     public PaymentsController(
         PaymentRequestValidator validator,
         PaymentsService paymentsService,
         PaymentsRepository paymentsRepository,
+        PaymentMetrics metrics,
         ILogger<PaymentsController> logger)
     {
         _validator = validator;
         _paymentsService = paymentsService;
         _paymentsRepository = paymentsRepository;
+        _metrics = metrics;
         _logger = logger;
     }
 
@@ -49,6 +52,7 @@ public class PaymentsController : ControllerBase
         Dictionary<string, string[]> errors = _validator.Validate(request);
         if (errors.Count > 0)
         {
+            _metrics.RecordPayment(PaymentMetrics.Rejected);
             return BadRequest(new RejectedPaymentResponse(errors));
         }
 
@@ -56,10 +60,12 @@ public class PaymentsController : ControllerBase
         {
             Payment payment = await _paymentsService.ProcessAsync(request, cancellationToken);
             _logger.LogInformation("Payment {PaymentId} processed with status {Status}", payment.Id, payment.Status);
+            _metrics.RecordPayment(payment.Status.ToString());
             return Ok(PaymentResponse.From(payment));
         }
         catch (BankUnavailableException ex)
         {
+            _metrics.RecordPayment(PaymentMetrics.BankUnavailable);
             _logger.LogWarning(ex, "Acquiring bank unavailable (bank status {BankStatusCode})", (int?)ex.HttpStatusCode);
             return Problem(
                 title: "The acquiring bank is unavailable. The payment was not processed, please retry later.",
