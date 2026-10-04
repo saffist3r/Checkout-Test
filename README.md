@@ -4,6 +4,6 @@
 
 The solution is in **[payment-gateway-challenge-dotnet/](payment-gateway-challenge-dotnet/README.md)**. Its README explains how to run it, the API, the design and the assumptions.
 
-- `assessment/` is a submodule of the original brief (`cko-recruitment/.github`). Fetch it with `git submodule update --init`.
+- The brief and the original template are published by Checkout.com at https://github.com/cko-recruitment/.
 - Demo UI: `cd payment-gateway-challenge-dotnet && docker-compose -f docker-compose.yml -f docker-compose.demo.yml up --build`, then open http://localhost:3000.
 - `AGENTS.md`, `CLAUDE.md` and `.claude/skills/` are the rules and conventions used while building it.
