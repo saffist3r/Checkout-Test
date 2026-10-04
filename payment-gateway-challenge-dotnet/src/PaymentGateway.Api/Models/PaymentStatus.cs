@@ -1,12 +1,11 @@
 namespace PaymentGateway.Api.Models;
 
 /// <summary>
-/// The three statuses from the brief. Stored payments are only ever Authorized or Declined:
-/// Rejected is returned for invalid requests, which never reach the bank and are not stored.
+/// Outcome of a payment that reached the acquiring bank. These are the only statuses a stored payment can have.
+/// Invalid requests never reach the bank; they get a <see cref="Responses.RejectedPaymentResponse"/> instead.
 /// </summary>
 public enum PaymentStatus
 {
     Authorized,
-    Declined,
-    Rejected
+    Declined
 }
