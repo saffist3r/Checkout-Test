@@ -72,7 +72,7 @@ PaymentsController          HTTP only: validate, call the service, map to a stat
 | Card number / CVV types | Strings, so leading zeros survive and 19 digits fit (the template used `int`). |
 | Last four digits | A string (`"0877"`, not `877`). |
 | Expiry | Month must be 1–12 and month+year must not be in the past. **A card expiring this month is accepted**, because cards are valid until the end of their expiry month. |
-| Currencies | `GBP`, `USD`, `EUR` (the brief caps the list at three). Uppercase only. |
+| Currencies | Two checks. The code must be an uppercase ISO 4217 code, checked against a local copy of the list (`Iso4217.cs`) so no external service is called per payment. It must then be one of `GBP`, `USD`, `EUR` (the brief caps the list at three). So `XYZ` and `JPY` get different errors. |
 | Amount | Integer in minor units and **must be > 0**. The brief says "integer"; a zero or negative payment makes no sense. `int` matches the template; a production system would use `long`, as Checkout's SDK does. |
 | Luhn check | Not applied. The brief doesn't require it and the simulator's test cards don't need it. |
 | Status values | Serialized as strings (`"Authorized"`), not enum numbers. |
@@ -87,9 +87,9 @@ PaymentsController          HTTP only: validate, call the service, map to a stat
 
 ## Tests
 
-56 tests, all deterministic (fixed `TimeProvider`, no network):
+61 tests, all deterministic (fixed `TimeProvider`, no network):
 
-- `PaymentRequestValidatorTest`: every rule with its boundaries (13/14/19/20 digits, month 0/1/12/13, last vs current month, currency case and length, CVV length and characters).
+- `PaymentRequestValidatorTest`: every rule with its boundaries (13/14/19/20 digits, month 0/1/12/13, last vs current month, currency ISO 4217 vs supported, CVV length and characters).
 - `PaymentsServiceTest`: status mapping, last-four extraction, and the bank request (`MM/yyyy` expiry).
 - `AcquiringBankClientTest`: snake_case wire format, and `4xx`/`5xx`, network failure and bad JSON all becoming `BankUnavailableException`. Uses a stub `HttpMessageHandler`.
 - `PaymentsControllerIntegrationTest`: `WebApplicationFactory` with a fake bank, covering every row of the API table, the POST → GET round trip, rejection without calling the bank, and no card number or CVV in responses.

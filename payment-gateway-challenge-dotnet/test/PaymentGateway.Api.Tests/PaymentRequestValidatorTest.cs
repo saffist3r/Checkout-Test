@@ -103,15 +103,35 @@ public class PaymentRequestValidatorTest
 
     [Theory]
     [InlineData("JPY")]
-    [InlineData("gbp")]
-    [InlineData("GB")]
-    [InlineData("GBPP")]
-    public void ShouldRejectUnsupportedCurrency(string currency)
+    [InlineData("CHF")]
+    public void ShouldRejectIsoCurrencyThatIsNotSupported(string currency)
     {
         PostPaymentRequest request = TestData.ValidRequest();
         request.Currency = currency;
 
-        _validator.Validate(request).Keys.ShouldContain("currency");
+        _validator.Validate(request)["currency"].ShouldBe(new[] { "Currency must be one of: GBP, USD, EUR." });
+    }
+
+    [Theory]
+    [InlineData("XYZ")]
+    [InlineData("ABC")]
+    [InlineData("gbp")]
+    [InlineData("GB")]
+    [InlineData("GBPP")]
+    [InlineData("12A")]
+    public void ShouldRejectCurrencyThatIsNotIso4217(string currency)
+    {
+        PostPaymentRequest request = TestData.ValidRequest();
+        request.Currency = currency;
+
+        _validator.Validate(request)["currency"].ShouldBe(new[] { "Currency must be an uppercase ISO 4217 code, such as GBP." });
+    }
+
+    [Fact]
+    public void ShouldOnlySupportIso4217Currencies()
+    {
+        PaymentRequestValidator.SupportedCurrencies.Count.ShouldBeLessThanOrEqualTo(3);
+        PaymentRequestValidator.SupportedCurrencies.ShouldAllBe(currency => Iso4217.Codes.Contains(currency));
     }
 
     [Theory]

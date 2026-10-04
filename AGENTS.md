@@ -9,7 +9,7 @@ A take-home technical assessment for Checkout.com: build a small **payment gatew
 
 | Path | What it is | Can we change it? |
 |------|------------|-------------------|
-| `assessment/` | Submodule of `cko-recruitment/.github`. The full brief lives in `assessment/profile/README.md`. | **No.** Read only. |
+| [cko-recruitment](https://github.com/cko-recruitment/) | Not in this repo. The full brief is the profile README of `cko-recruitment/.github`. | **No.** Read only, never push there. |
 | `payment-gateway-challenge-dotnet/` | The .NET template, brought in as a regular folder (with its history) so the solution can be pushed to our own repo. **All solution code goes here.** | Yes, except the files below. |
 | `payment-gateway-challenge-dotnet/imposters/` | Bank simulator (Mountebank) config. | **No.** |
 | `payment-gateway-challenge-dotnet/.editorconfig` | Formatting rules used to grade submissions. | **No.** |
@@ -56,8 +56,8 @@ We follow the conventions of Checkout's own public .NET code ([checkout-sdk-net]
 ```
 src/PaymentGateway.Api
   Controllers/        HTTP only: bind, call, map to status codes. No business logic.
-  Models/             Domain record (Payment), PaymentStatus, request and response DTOs.
-  Services/           PaymentRequestValidator, PaymentsService (orchestration), PaymentsRepository (in-memory).
+  Models/             Domain record (Payment), PaymentStatus enum, request and response DTOs.
+  Services/           PaymentRequestValidator, Iso4217 (local code list), PaymentsService (orchestration), PaymentsRepository (in-memory).
   Services/Bank/      IAcquiringBankClient + typed HttpClient implementation and bank DTOs.
 test/PaymentGateway.Api.Tests
   Unit tests per class + in-process API tests with WebApplicationFactory.

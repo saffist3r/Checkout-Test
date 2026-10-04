@@ -84,9 +84,9 @@ public class PaymentRequestValidator
         {
             Fail(nameof(request.Currency), "Currency is required.");
         }
-        else if (request.Currency.Length != 3)
+        else if (!Iso4217.Codes.Contains(request.Currency))
         {
-            Fail(nameof(request.Currency), "Currency must be 3 characters long.");
+            Fail(nameof(request.Currency), "Currency must be an uppercase ISO 4217 code, such as GBP.");
         }
         else if (!SupportedCurrencies.Contains(request.Currency))
         {
