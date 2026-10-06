@@ -79,7 +79,7 @@ test/PaymentGateway.Api.Tests
 | `GET` unknown id | `404 Not Found` |
 | `GET` known id | `200 OK`, same payment body |
 
-- Routes: `POST /api/payments`, `GET /api/payments/{id:guid}`.
+- Routes: `POST /api/v1/payments`, `GET /api/v1/payments/{id:guid}`.
 - JSON is camelCase; enums serialize as **strings**.
 - Payment body fields: `id`, `status`, `cardNumberLastFour` (string, keeps leading zeros), `expiryMonth`, `expiryYear`, `currency`, `amount`.
 

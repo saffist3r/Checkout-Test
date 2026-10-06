@@ -2,28 +2,28 @@
 @host = http://localhost:5067
 
 ### Authorized (card ends in an odd digit)
-POST {{host}}/api/payments
+POST {{host}}/api/v1/payments
 Content-Type: application/json
 
 { "cardNumber": "2222405343248877", "expiryMonth": 4, "expiryYear": 2027, "currency": "GBP", "amount": 1050, "cvv": "123" }
 
 ### Declined (card ends in an even digit)
-POST {{host}}/api/payments
+POST {{host}}/api/v1/payments
 Content-Type: application/json
 
 { "cardNumber": "2222405343248112", "expiryMonth": 4, "expiryYear": 2027, "currency": "USD", "amount": 60000, "cvv": "456" }
 
 ### Bank unavailable (card ends in 0) -> 502
-POST {{host}}/api/payments
+POST {{host}}/api/v1/payments
 Content-Type: application/json
 
 { "cardNumber": "2222405343248110", "expiryMonth": 4, "expiryYear": 2027, "currency": "EUR", "amount": 100, "cvv": "123" }
 
 ### Rejected (invalid input, bank not called) -> 400
-POST {{host}}/api/payments
+POST {{host}}/api/v1/payments
 Content-Type: application/json
 
 { "cardNumber": "1234", "expiryMonth": 13, "expiryYear": 2020, "currency": "JPY", "amount": 0, "cvv": "12a" }
 
 ### Retrieve a payment (paste an id from a response above)
-GET {{host}}/api/payments/00000000-0000-0000-0000-000000000000
+GET {{host}}/api/v1/payments/00000000-0000-0000-0000-000000000000

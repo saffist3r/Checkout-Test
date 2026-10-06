@@ -65,7 +65,7 @@ jobs:
       - name: Wait for the gateway
         run: |
           for i in $(seq 1 30); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/payments/00000000-0000-0000-0000-000000000000 || true)
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/api/v1/payments/00000000-0000-0000-0000-000000000000 || true)
             [ "$code" = "404" ] && exit 0
             sleep 2
           done
