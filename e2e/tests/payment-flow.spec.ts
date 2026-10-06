@@ -12,7 +12,7 @@ async function pickScenario(page: Page, name: string) {
 }
 
 async function pay(page: Page) {
-  const response = page.waitForResponse(r => r.url().endsWith("/api/payments") && r.request().method() === "POST");
+  const response = page.waitForResponse(r => r.url().endsWith("/api/v1/payments") && r.request().method() === "POST");
   await page.getByRole("button", { name: "Pay" }).click();
   return response;
 }
@@ -31,7 +31,7 @@ test("should authorize a payment and retrieve it from the list", async ({ page }
   const payment = await response.json();
 
   await expect(result(page).locator(".badge")).toHaveText("Authorized");
-  await expect(result(page)).toContainText("POST /api/payments → 200");
+  await expect(result(page)).toContainText("POST /api/v1/payments → 200");
 
   // Only the last four digits come back; the full card number and the CVV never do.
   expect(payment.cardNumberLastFour).toBe("8877");
@@ -44,10 +44,10 @@ test("should authorize a payment and retrieve it from the list", async ({ page }
   await expect(row).toContainText("10.50 GBP");
 
   // The merchant later looks the payment up and gets the same record back.
-  const lookup = page.waitForResponse(`**/api/payments/${payment.id}`);
+  const lookup = page.waitForResponse(`**/api/v1/payments/${payment.id}`);
   await row.getByRole("button", { name: "Retrieve" }).click();
   expect((await lookup).status()).toBe(200);
-  await expect(result(page)).toContainText(`GET /api/payments/${payment.id} → 200`);
+  await expect(result(page)).toContainText(`GET /api/v1/payments/${payment.id} → 200`);
   await expect(result(page).locator(".badge")).toHaveText("Authorized");
 });
 
@@ -65,7 +65,7 @@ test("should store a declined payment so the merchant can see it", async ({ page
 
   await page.getByLabel("Payment id").fill(payment.id);
   await page.locator("#lookup-form").getByRole("button", { name: "Retrieve" }).click();
-  await expect(result(page)).toContainText(`GET /api/payments/${payment.id} → 200`);
+  await expect(result(page)).toContainText(`GET /api/v1/payments/${payment.id} → 200`);
   await expect(result(page).locator(".badge")).toHaveText("Declined");
 });
 
@@ -114,5 +114,5 @@ test("should say not found for an unknown payment id", async ({ page }) => {
   await page.locator("#lookup-form").getByRole("button", { name: "Retrieve" }).click();
 
   await expect(result(page).locator(".badge")).toHaveText("Not found");
-  await expect(result(page)).toContainText(`GET /api/payments/${unknownId} → 404`);
+  await expect(result(page)).toContainText(`GET /api/v1/payments/${unknownId} → 404`);
 });

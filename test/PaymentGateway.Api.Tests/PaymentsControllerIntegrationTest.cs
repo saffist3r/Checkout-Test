@@ -20,7 +20,7 @@ namespace PaymentGateway.Api.Tests;
 
 public class PaymentsControllerIntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 {
-    private const string PaymentsPath = "/api/payments";
+    private const string PaymentsPath = "/api/v1/payments";
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
@@ -100,8 +100,8 @@ public class PaymentsControllerIntegrationTest : IClassFixture<WebApplicationFac
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         using JsonDocument document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         JsonElement paths = document.RootElement.GetProperty("paths");
-        paths.GetProperty("/api/Payments").TryGetProperty("post", out _).ShouldBeTrue();
-        paths.GetProperty("/api/Payments/{id}").TryGetProperty("get", out _).ShouldBeTrue();
+        paths.GetProperty("/api/v1/Payments").TryGetProperty("post", out _).ShouldBeTrue();
+        paths.GetProperty("/api/v1/Payments/{id}").TryGetProperty("get", out _).ShouldBeTrue();
         document.RootElement.GetProperty("info").GetProperty("title").GetString().ShouldBe("Payment Gateway API");
     }
 

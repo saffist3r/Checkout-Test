@@ -16,7 +16,7 @@ The gateway validates, forwards to the bank, records the outcome and lets the me
 ## Components
 
 ```
-PaymentsController           POST /api/payments, GET /api/payments/{id}
+PaymentsController           POST /api/v1/payments, GET /api/v1/payments/{id}
   ├─ PaymentRequestValidator  pure rules + TimeProvider
   ├─ PaymentsService          map request → bank call → Payment → store
   │    ├─ IAcquiringBankClient (AcquiringBankClient: typed HttpClient, snake_case, error mapping)

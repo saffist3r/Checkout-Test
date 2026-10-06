@@ -31,7 +31,9 @@ nginx serves `demo/index.html` and proxies `/api` to the gateway, so the API nee
 
 ## API
 
-### `POST /api/payments`
+Payment endpoints are versioned in the URL (`/api/v1/...`). A breaking change to a request or response ships as `v2` next to `v1`, so existing merchants keep working until they migrate. `/health` and Swagger are operational endpoints and stay unversioned.
+
+### `POST /api/v1/payments`
 
 ```json
 { "cardNumber": "2222405343248877", "expiryMonth": 4, "expiryYear": 2027, "currency": "GBP", "amount": 1050, "cvv": "123" }
@@ -44,7 +46,7 @@ nginx serves `demo/index.html` and proxies `/api` to the gateway, so the API nee
 | Invalid request | `400` | `{ "status": "Rejected", "errors": { "cardNumber": ["..."], ... } }` |
 | Bank unavailable | `502` | ProblemDetails |
 
-### `GET /api/payments/{id}`
+### `GET /api/v1/payments/{id}`
 
 `200` with the same payment body, or `404` if the id is unknown.
 
