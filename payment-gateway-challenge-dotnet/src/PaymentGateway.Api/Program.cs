@@ -35,7 +35,6 @@ builder.Services.AddControllers()
             return new BadRequestObjectResult(new RejectedPaymentResponse(errors));
         };
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
