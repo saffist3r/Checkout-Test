@@ -1,6 +1,6 @@
 ---
 name: dotnet-clean-code
-description: C#/.NET 8 clean code conventions for this payment gateway. Use when writing or reviewing any C# in payment-gateway-challenge-dotnet: naming, structure, nullability, async, DI, error handling, and what "simple, not over-engineered" means here.
+description: C#/.NET 8 clean code conventions for this payment gateway. Use when writing or reviewing any C# in this repository: naming, structure, nullability, async, DI, error handling, and what "simple, not over-engineered" means here.
 ---
 
 # .NET clean code for the payment gateway

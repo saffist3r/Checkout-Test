@@ -10,12 +10,12 @@ A take-home technical assessment for Checkout.com: build a small **payment gatew
 | Path | What it is | Can we change it? |
 |------|------------|-------------------|
 | [cko-recruitment](https://github.com/cko-recruitment/) | Not in this repo. The full brief is the profile README of `cko-recruitment/.github`. | **No.** Read only, never push there. |
-| `payment-gateway-challenge-dotnet/` | The .NET template, brought in as a regular folder (with its history) so the solution can be pushed to our own repo. **All solution code goes here.** | Yes, except the files below. |
-| `payment-gateway-challenge-dotnet/imposters/` | Bank simulator (Mountebank) config. | **No.** |
-| `payment-gateway-challenge-dotnet/.editorconfig` | Formatting rules used to grade submissions. | **No.** |
-| `payment-gateway-challenge-dotnet/docker-compose.yml` | Starts the simulator. | Only if strictly needed; prefer not. |
+| Repository root | The .NET template, brought in with its history so the solution can be pushed to our own repo. **All solution code lives here.** | Yes, except the files below. |
+| `imposters/` | Bank simulator (Mountebank) config. | **No.** |
+| `.editorconfig` | Formatting rules used to grade submissions. | **No.** |
+| `docker-compose.yml` | Starts the simulator. | Only if strictly needed; prefer not. |
 
-**The brief is the spec.** When these rules and the brief disagree, the brief wins. When the brief is silent, pick the simplest reasonable option, write it down in the solution README's *Assumptions* section, and move on.
+**The brief is the spec.** When these rules and the brief disagree, the brief wins. When the brief is silent, pick the simplest reasonable option, write it down in the README's *Assumptions* section, and move on.
 
 ## 2. Hard constraints from the assessment
 
@@ -23,7 +23,7 @@ A take-home technical assessment for Checkout.com: build a small **payment gatew
 2. **Automated tests** cover the behaviour (see §7).
 3. **Simple and maintainable. No over-engineering.** Reviewers explicitly penalise it. No MediatR, CQRS, repositories-of-repositories, generic base classes, AutoMapper, or extra projects "for later".
 4. **Focus on the functional requirements**: process a payment (Authorized / Declined / Rejected) and retrieve a payment by id.
-5. **Document key design decisions and assumptions** in `payment-gateway-challenge-dotnet/README.md`.
+5. **Document key design decisions and assumptions** in `README.md`.
 6. **Never open pull requests or push to `cko-recruitment` repositories.** Our remote is `git@github.com:saffist3r/Checkout-Test.git`.
 
 ## 3. Workflow rules for agents
@@ -106,7 +106,6 @@ See `.claude/skills/payments-fintech/SKILL.md` for the reasoning and what to men
 ## 9. Commands
 
 ```bash
-cd payment-gateway-challenge-dotnet
 docker-compose up -d          # bank simulator on http://localhost:8080
 dotnet build
 dotnet test

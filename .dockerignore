@@ -4,3 +4,5 @@
 **/.idea
 test/
 e2e/
+.git
+.claude
